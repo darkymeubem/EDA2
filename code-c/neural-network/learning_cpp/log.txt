@@ -1,0 +1,2 @@
+[31mNumero:[0m42
+produzindo meu proprio cout 42 eh louco
