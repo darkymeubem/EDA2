@@ -142,20 +142,34 @@ Image& Image::colorMask(float r, float g, float b){
     return *this;
 }
 
-Image& encodeMessage(const char* message){
-    uint32_t len = strlen(message) *sizeof(char);
+Image& Image::encodeMessage(const char* message){
+    uint32_t len = strlen(message) *8;
+    if(len + STEG_HEADER_SIZE > size) {
+		printf("\e[31m[ERROR] This message is too large (%lu bits / %zu bits)\e[0m\n", len+STEG_HEADER_SIZE, size);
+		return *this;
+	}
+
     printf("LENGTH: %d\n", len);
      for(uint8_t i=0; i < STEG_HEADER_SIZE; i++){
-        uint8_t bit |= len >> (STEG_HEADER_SIZE -i - 1) & 1UL;
-        data[i] = (data[i] & 0xFE) | bit
+        uint8_t bit = (len >> (STEG_HEADER_SIZE - i - 1)) & 1UL;
+        data[i] = (data[i] & 0xFE) | bit;
+     }
+
+     for(uint32_t i=0; i < len; i++){
+        data[STEG_HEADER_SIZE +i] &= 0xFE; //isola ultimo bit
+        data[STEG_HEADER_SIZE + i] = (message[i/8] >> ((len-1-i)%8)) & 1UL; //adiciona bit ao pixel
      }
     return *this;
 }
-Image& decodeMessage(char *buffer, size_t* messageLength){
+Image& Image::decodeMessage(char *buffer, size_t* messageLength){
     uint32_t len = 0;
     for(uint8_t i=0; i < STEG_HEADER_SIZE; i++){
-        len = (len << 1) | (data[i] & 1UL)
+        len = (len << 1) | (data[i] & 1UL);
      }
-     printf("LENGTH: %d\n", len);
+    *messageLength = len;
+    for(uint32_t i=0; i < len; i++){
+       buffer[i/8] = (buffer[i/8] << 1) | (data[STEG_HEADER_SIZE + i] & 1U);
+     }
+    buffer[len/8] = '\0';
     return *this;
 }
