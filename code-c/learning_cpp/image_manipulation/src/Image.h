@@ -2,6 +2,8 @@
 #include <cstdio>
 #include <cstdint>
 
+#define STEG_HEADER_SIZE sizeof(uint32_t) * 8
+
 enum ImageType{
 	PNG, JPG, BMP, TGA
 };
@@ -22,4 +24,14 @@ struct Image {
 	bool write(const char* filename);
 
 	ImageType getFileType(const char* filename);
+
+	//grayscale methods
+	Image& grayscale_avg();
+	Image& grayscale_lum();
+
+
+	Image& colorMask(float r, float g, float b);
+
+	Image& encodeMessage(const char* message);
+	Image& decodeMessage(char *buffer, size_t* messageLength);
 };

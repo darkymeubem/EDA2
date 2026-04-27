@@ -16,5 +16,17 @@ int main(int argc, char** argv) {
         blank.data[i] = 255 - i*255/(blank.w*blank.channels*blank.h);
     }
     blank.write("blank.jpg");
+
+    Image gray_avg("teste.png");
+    Image gray_lum("teste.png");
+    
+    //testando grayscale
+    gray_avg.grayscale_avg().write("gray_avg.jpg");
+    gray_lum.grayscale_lum().write("gray_lum.jpg");
+    
+    //testando color mask
+    test.colorMask(1, 0.5, 0.0).write("test_color_mask.jpg");
+
+   
 	return 0;
 }
