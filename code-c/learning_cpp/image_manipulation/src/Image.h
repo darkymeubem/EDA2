@@ -42,4 +42,6 @@ struct Image {
 	Image& decodeMessage(char *buffer, size_t* messageLength);
 
 	Image& diffMap(Image& img);
+	Image& diffMap_scale(Image& img, uint8_t scl = 0);
+
 };
