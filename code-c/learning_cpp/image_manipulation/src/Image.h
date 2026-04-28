@@ -1,6 +1,11 @@
 
 #include <cstdio>
 #include <cstdint>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+
 
 #define STEG_HEADER_SIZE sizeof(uint32_t) * 8
 
@@ -32,6 +37,9 @@ struct Image {
 
 	Image& colorMask(float r, float g, float b);
 
+	//esteganografia methods
 	Image& encodeMessage(const char* message);
 	Image& decodeMessage(char *buffer, size_t* messageLength);
+
+	Image& diffMap(Image& img);
 };
