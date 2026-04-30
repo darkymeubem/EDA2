@@ -5,6 +5,8 @@
 
 #include "stb_image.h"
 #include "stb_image_write.h"
+#include <cstdint>
+#include <vector>
 
 #include "Image.h"
 
@@ -209,5 +211,137 @@ Image& Image::diffMap_scale(Image& img, uint8_t scl){
         data[i] *=scl;
     }
 
+	return *this;
+}
+
+//cr e cc são as coordenadas do kernel (centro do kernel nas coordenadas do filtro)
+Image& Image::std_convolve_clamp_to_0(uint8_t channel, uint32_t ker_w, uint32_t ker_h, double ker[], uint32_t cr, uint32_t cc) {
+	std::vector<uint8_t> new_data(static_cast<size_t>(w) * static_cast<size_t>(h));
+	/* Usar int64_t em vez de long: em Windows (LLP64) long tem 4 bytes como int; int64_t é
+	   sempre 64 bits e evita ambiguidade nas comparações i < ker_h - cr (unsigned vs signed). */
+	const std::int64_t kw = static_cast<std::int64_t>(ker_w);
+	const std::int64_t kh = static_cast<std::int64_t>(ker_h);
+	const std::int64_t cri = static_cast<std::int64_t>(cr);
+	const std::int64_t cci = static_cast<std::int64_t>(cc);
+	/* Não somar índice do kernel em uint64_t: uint64_t + offset negativo vira wrap (imagem preta). */
+	const std::int64_t kcenter = cri * kw + cci;
+	const std::int64_t w64 = static_cast<std::int64_t>(w);
+	const std::int64_t h64 = static_cast<std::int64_t>(h);
+	for(uint64_t k=channel; k<size; k+=channels) {
+		double c = 0;
+		const std::int64_t pix = static_cast<std::int64_t>(k / channels);
+		const std::int64_t pr = pix / w64;
+		const std::int64_t pc = pix % w64;
+		for(std::int64_t i = -cri; i < kh - cri; ++i) {
+			const std::int64_t row = pr + i;
+			if(row < 0 || row >= h64) {
+				continue;
+			}
+			for(std::int64_t j = -cci; j < kw - cci; ++j) {
+				const std::int64_t col = pc + j;
+				if(col < 0 || col >= w64) {
+					continue;
+				}
+				const std::int64_t kidx = kcenter + i * kw + j;
+				const std::int64_t p = (row * w64 + col) * static_cast<std::int64_t>(channels) + static_cast<std::int64_t>(channel);
+				c += ker[kidx] * data[static_cast<size_t>(p)];
+			}
+		}
+		new_data[static_cast<size_t>(k / channels)] =
+			static_cast<uint8_t>(BYTE_BOUND(std::lround(c)));
+	}
+	for(uint64_t k=channel; k<size; k+=channels) {
+		data[k] = new_data[static_cast<size_t>(k / channels)];
+	}
+	return *this;
+}
+
+Image& Image::std_convolve_clamp_to_border(uint8_t channel, uint32_t ker_w, uint32_t ker_h, double ker[], uint32_t cr, uint32_t cc) {
+	if (data == nullptr || channels <= 0 || channel >= static_cast<uint8_t>(channels) || ker == nullptr ||
+		ker_w == 0 || ker_h == 0 || cr >= ker_h || cc >= ker_w) {
+		return *this;
+	}
+
+	std::vector<uint8_t> new_data(static_cast<size_t>(w) * static_cast<size_t>(h));
+	const std::int64_t kw = static_cast<std::int64_t>(ker_w);
+	const std::int64_t kh = static_cast<std::int64_t>(ker_h);
+	const std::int64_t cri = static_cast<std::int64_t>(cr);
+	const std::int64_t cci = static_cast<std::int64_t>(cc);
+	const std::int64_t kcenter = cri * kw + cci;
+	const std::int64_t w64 = static_cast<std::int64_t>(w);
+	const std::int64_t h64 = static_cast<std::int64_t>(h);
+	for(uint64_t k=channel; k<size; k+=channels) {
+		double c = 0;
+		const std::int64_t pix = static_cast<std::int64_t>(k / channels);
+		const std::int64_t pr = pix / w64;
+		const std::int64_t pc = pix % w64;
+		for(std::int64_t i = -cri; i < kh - cri; ++i) {
+			std::int64_t row = pr + i;
+			if (row < 0)
+				row = 0;
+			else if (row >= h64)
+				row = h64 - 1;
+			for(std::int64_t j = -cci; j < kw - cci; ++j) {
+				std::int64_t col = pc + j;
+				if (col < 0)
+					col = 0;
+				else if (col >= w64)
+					col = w64 - 1;
+				const std::int64_t kidx = kcenter + i * kw + j;
+				const std::int64_t p = (row * w64 + col) * static_cast<std::int64_t>(channels) + static_cast<std::int64_t>(channel);
+				c += ker[kidx] * data[static_cast<size_t>(p)];
+			}
+		}
+		new_data[static_cast<size_t>(k / channels)] =
+			static_cast<uint8_t>(BYTE_BOUND(std::lround(c)));
+	}
+	for(uint64_t k=channel; k<size; k+=channels) {
+		data[k] = new_data[static_cast<size_t>(k / channels)];
+	}
+	return *this;
+}
+
+Image& Image::std_convolve_clamp_to_cycle(uint8_t channel, uint32_t ker_w, uint32_t ker_h, double ker[], uint32_t cr, uint32_t cc) {
+	if (data == nullptr || channels <= 0 || channel >= static_cast<uint8_t>(channels) || ker == nullptr ||
+		ker_w == 0 || ker_h == 0 || cr >= ker_h || cc >= ker_w) {
+		return *this;
+	}
+
+	std::vector<uint8_t> new_data(static_cast<size_t>(w) * static_cast<size_t>(h));
+	const std::int64_t kw = static_cast<std::int64_t>(ker_w);
+	const std::int64_t kh = static_cast<std::int64_t>(ker_h);
+	const std::int64_t cri = static_cast<std::int64_t>(cr);
+	const std::int64_t cci = static_cast<std::int64_t>(cc);
+	const std::int64_t kcenter = cri * kw + cci;
+	const std::int64_t w64 = static_cast<std::int64_t>(w);
+	const std::int64_t h64 = static_cast<std::int64_t>(h);
+	for(uint64_t k=channel; k<size; k+=channels) {
+		double c = 0;
+		const std::int64_t pix = static_cast<std::int64_t>(k / channels);
+		const std::int64_t pr = pix / w64;
+		const std::int64_t pc = pix % w64;
+		for(std::int64_t i = -cri; i < kh - cri; ++i) {
+			std::int64_t row = pr + i;
+			if (row < 0)
+				row = row%h64 + h64;
+			else if (row >= h64)
+				row %= h64;
+			for(std::int64_t j = -cci; j < kw - cci; ++j) {
+				std::int64_t col = pc + j;
+				if (col < 0)
+					col = col%w64 + w64;
+				else if (col >= w64)
+					col %= w64;
+				const std::int64_t kidx = kcenter + i * kw + j;
+				const std::int64_t p = (row * w64 + col) * static_cast<std::int64_t>(channels) + static_cast<std::int64_t>(channel);
+				c += ker[kidx] * data[static_cast<size_t>(p)];
+			}
+		}
+		new_data[static_cast<size_t>(k / channels)] =
+			static_cast<uint8_t>(BYTE_BOUND(std::lround(c)));
+	}
+	for(uint64_t k=channel; k<size; k+=channels) {
+		data[k] = new_data[static_cast<size_t>(k / channels)];
+	}
 	return *this;
 }
