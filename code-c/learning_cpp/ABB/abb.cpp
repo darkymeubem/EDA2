@@ -89,12 +89,20 @@ private:
         
         return raiz; // Corrigido: Retorna a raiz atualizada para que a recursão reconecte a árvore.
     }
+    void destroyTree(node *raiz){
+        if(raiz != nullptr){
+            destroyTree(raiz->esq);
+            destroyTree(raiz->dir);
+            delete raiz;
+        }
+    }
 
 public:
     ABB() : root(nullptr) {}
+    ABB(int x) : root(createABB(x)) {}
 
     void insert(int x) { insertNode(root, x); }
     void remove(int x) { root = removeNode(root, x); }
-    
+    void destroy() { destroyTree(root); }
   
 };
