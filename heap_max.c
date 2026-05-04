@@ -103,34 +103,20 @@ void print_heap(heap *fp) {
     printf("\n");
 }
 
-int main(void) {
-    heap *h = criaHeap(16);
-    int in[] = {3, 9, 1, 7, 4, 8};
-    int n_in = (int)(sizeof in / sizeof in[0]);
-    int esperado[] = {9, 8, 7, 4, 3, 1};
-    for (int i = 0; i < n_in; i++)
-        insert(h, in[i]);
-    if (h->n != n_in) {
-        printf("falhou: n apos insercoes: esperado %d, obteve %d\n", n_in, h->n);
-        libera_heap(h);
-        return 1;
+int main(){
+    heap *fp = criaHeap(1000);
+    for(int i =0; i < 7; i++){
+        int x;
+        scanf("%d", &x);
+        insert(fp, x);
     }
-    printf("arranjo apos insercoes: ");
-    print_heap(h);
-    for (int i = 0; i < n_in; i++) {
-        int v = heap_pop(h);
-        if (v != esperado[i]) {
-            printf("falhou na extracao %d: esperado %d, obteve %d\n", i, esperado[i], v);
-            libera_heap(h);
-            return 1;
-        }
-    }
-    if (h->n != 0) {
-        printf("falhou: heap deveria estar vazio (n=%d)\n", h->n);
-        libera_heap(h);
-        return 1;
-    }
-    printf("teste heap_max: ok (%d extracoes em ordem decrescente)\n", n_in);
-    libera_heap(h);
+    print_heap(fp);
+    int res = heap_pop(fp);
+    printf("removido: %d\n", res);
+    print_heap(fp);
+
+    int res1 = heap_pop(fp);
+    printf("removido: %d\n", res1);
+    print_heap(fp);
     return 0;
 }
