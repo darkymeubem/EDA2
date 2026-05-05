@@ -96,6 +96,13 @@ private:
             delete raiz;
         }
     }
+    int altura(node* raiz) {
+        if (raiz == nullptr)
+            return -1;
+        int hEsq = altura(raiz->esq);
+        int hDir = altura(raiz->dir);
+        return 1 + (hEsq > hDir ? hEsq : hDir);
+    }
 
 public:
     ABB() : root(nullptr) {}
@@ -104,5 +111,6 @@ public:
     void insert(int x) { insertNode(root, x); }
     void remove(int x) { root = removeNode(root, x); }
     void destroy() { destroyTree(root); }
+    int altura() { return altura(root); }
   
 };

@@ -1,0 +1,18 @@
+# Binários e artefatos de compilação
+*.exe
+*.o
+*.obj
+*.out
+*.a
+*.lib
+*.dll
+*.pdb
+*.ilk
+build/
+Debug/
+Release/
+.xmake/
+
+# Editor / OS
+.DS_Store
+Thumbs.db

@@ -1,6 +1,13 @@
 {
   "C_Cpp_Runner.cCompilerPath": "gcc",
   "C_Cpp_Runner.cppCompilerPath": "g++",
+  "C_Cpp.default.compilerPath": "C:/MinGW/bin/g++.exe",
+  "C_Cpp.default.intelliSenseMode": "windows-gcc-x64",
+  "C_Cpp.default.cppStandard": "c++17",
+  "clangd.arguments": [
+    "--query-driver=C:/MinGW/bin/g++.exe",
+    "--header-insertion=never"
+  ],
   "C_Cpp_Runner.debuggerPath": "gdb",
   "C_Cpp_Runner.cStandard": "",
   "C_Cpp_Runner.cppStandard": "",

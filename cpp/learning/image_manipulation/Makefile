@@ -1,4 +1,4 @@
-# Diretório deste Makefile (caminhos como ../imgs em main.cpp assumem o cwd = esta pasta)
+# cwd do make/run = esta pasta (main.cpp usa caminhos como imgs/...)
 PROJ_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 CXX := g++
@@ -22,7 +22,7 @@ $(BUILD_DIR)/Image.o: $(SRC_DIR)/Image.cpp $(SRC_DIR)/Image.h
 $(BUILD_DIR)/main.o: $(SRC_DIR)/main.cpp $(SRC_DIR)/Image.h
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
-# use sempre a pasta do projeto, para ../imgs bater com learning_cpp/imgs
+# executa o binário com cwd = pasta do Makefile
 run: $(TARGET)
 	cd "$(PROJ_DIR)" && ./$(TARGET)
 
