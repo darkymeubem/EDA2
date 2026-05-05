@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 //void qsort(void *base, size_t nitems, size_t size, int (*compar)(const void *, const void *));
+// *base = array/ lista de elementos
+// o tamanho da lista
+// o sizeof do tipo do array
+// a funcao de comparacao, o criterio de como sera ordenado (usario que faz, eu fiz uma funcao de compararInts)
 int compararInts(const void *a, const void *b){
     int cA = *(const int*)a;
     int cB = *(const int*)b;
