@@ -1,61 +1,85 @@
 #include <stdio.h>
-#include <stdlib.h>
+
+void merge(int A[], int low, int high, int mid)
+{
+    int i, j, k, c[5000];
+    i = low;
+    k = low;
+    j = mid + 1;
+    while (i <= mid && j <= high)
+    {
+        if (A[i] < A[j])
+        {
+            c[k] = A[i];
+            k++;
+            i++;
+        }
+        else
+        {
+            c[k] = A[j];
+            k++;
+            j++;
+        }
+    }
+    while (i <= mid)
+    {
+        c[k] = A[i];
+        k++;
+        i++;
+    }
+    while (j <= high)
+    {
+        c[k] = A[j];
+        k++;
+        j++;
+    }
+    for (i = low; i < k; i++)
+    {
+        A[i] = c[i];
+    }
+}
+
 
 static void merge(int arr[], int left, int mid, int right) {
-    int n1 = mid - left + 1;
-    int n2 = right - mid;
+    int aux[right - left + 1];
 
-    int *L = (int *)malloc(n1 * sizeof(int));
-    int *R = (int *)malloc(n2 * sizeof(int));
-
-    if (L == NULL || R == NULL) {
-        free(L);
-        free(R);
-        fprintf(stderr, "Erro de alocacao de memoria.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    for (int i = 0; i < n1; i++) {
-        L[i] = arr[left + i];
-    }
-    for (int j = 0; j < n2; j++) {
-        R[j] = arr[mid + 1 + j];
+    for (int i = left; i <= right; i++) {
+        aux[i - left] = arr[i];
     }
 
     int i = 0;
-    int j = 0;
+    int j = mid - left + 1;
+    int left_end = mid - left;
+    int right_end = right - left;
     int k = left;
 
-    while (i < n1 && j < n2) {
-        if (L[i] <= R[j]) {
-            arr[k++] = L[i++];
+    while (i <= left_end && j <= right_end) {
+        if (aux[i] <= aux[j]) {
+            arr[k++] = aux[i++];
         } else {
-            arr[k++] = R[j++];
+            arr[k++] = aux[j++];
         }
     }
 
-    while (i < n1) {
-        arr[k++] = L[i++];
+    while (i <= left_end) {
+        arr[k++] = aux[i++];
     }
 
-    while (j < n2) {
-        arr[k++] = R[j++];
+    while (j <= right_end) {
+        arr[k++] = aux[j++];
     }
-
-    free(L);
-    free(R);
 }
 
 void merge_sort(int arr[], int left, int right) {
-    if (left >= right) {
-        return;
+    if(left < right){
+        int mid = left + (right - left) / 2;
+
+        merge_sort(arr, left, mid);
+        merge_sort(arr, mid + 1, right);
+        merge(arr, left, mid, right);
     }
 
-    int mid = left + (right - left) / 2;
-
-    merge_sort(arr, left, mid);
-    merge_sort(arr, mid + 1, right);
-    merge(arr, left, mid, right);
+    return;
 }
 
 static void print_array(const int arr[], int n) {
