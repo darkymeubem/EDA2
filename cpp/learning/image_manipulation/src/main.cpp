@@ -2,11 +2,9 @@
 #include <iostream>
 int main(int argc, char** argv) {
 	Image test1("imgs/teste.png");
-	Image test2 = test1;
-	test1.flipX();
-	test1.write("imgs/teste_flipX.png");
+	Image logo("imgs/Coca-Cola_logo.png");
 
-	test2.flipY();
-	test2.write("imgs/teste_flipY.png");
+	test1.overlay(logo, -50, 20);
+	test1.write("imgs/output_overlay.png");
 	return 0;
 }
