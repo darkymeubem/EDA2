@@ -53,5 +53,5 @@ struct Image {
 	Image& flipX();
 	Image& flipY();
 
-
+	Image& overlay(const Image& source, int x, int y);
 };
