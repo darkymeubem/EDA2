@@ -1,11 +1,19 @@
 
 #include <cstdio>
 #include <cstdint>
-#include <cmath>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include "schrift.h"
+#include <complex>
+
+//legacy feature of C
+#undef __STRICT_ANSI__
+#define _USE_MATH_DEFINES 
+#include <cmath>
+#ifndef M_PI
+	#define M_PI (3.14159265358979323846)
+#endif
 
 #define STEG_HEADER_SIZE sizeof(uint32_t) * 8
 
@@ -60,6 +68,27 @@ struct Image {
 
 
 	Image& crop(uint16_t cx, uint16_t cy, uint16_t cw, uint16_t ch);
+
+
+	static uint32_t rev(uint32_t n, uint32_t a);
+	static void bit_rev(uint32_t n, std::complex<double> a[], std::complex<double>* A);
+
+	static void fft(uint32_t n, std::complex<double> x[], std::complex<double>* X);
+	static void ifft(uint32_t n, std::complex<double> X[], std::complex<double>* x);
+	static void dft_2D(uint32_t m, uint32_t n, std::complex<double> x[], std::complex<double>* X);
+	static void idft_2D(uint32_t m, uint32_t n, std::complex<double> X[], std::complex<double>* x);
+
+	static void pad_kernel(uint32_t ker_w, uint32_t ker_h, double ker[], uint32_t cr, uint32_t cc, uint32_t pw, uint32_t ph, std::complex<double>* pad_ker);
+	static inline void pointwise_product(uint64_t l, std::complex<double> a[], std::complex<double> b[], std::complex<double>* p);
+
+	Image& fd_convolve_clamp_to_0(uint8_t channel, uint32_t ker_w, uint32_t ker_h, double ker[], uint32_t cr, uint32_t cc);
+	Image& fd_convolve_clamp_to_border(uint8_t channel, uint32_t ker_w, uint32_t ker_h, double ker[], uint32_t cr, uint32_t cc);
+	Image& fd_convolve_cyclic(uint8_t channel, uint32_t ker_w, uint32_t ker_h, double ker[], uint32_t cr, uint32_t cc);
+	
+
+	Image& convolve_linear(uint8_t channel, uint32_t ker_w, uint32_t ker_h, double ker[], uint32_t cr, uint32_t cc);
+	Image& convolve_clamp_to_border(uint8_t channel, uint32_t ker_w, uint32_t ker_h, double ker[], uint32_t cr, uint32_t cc);
+	Image& convolve_cyclic(uint8_t channel, uint32_t ker_w, uint32_t ker_h, double ker[], uint32_t cr, uint32_t cc);
 
 };
 
