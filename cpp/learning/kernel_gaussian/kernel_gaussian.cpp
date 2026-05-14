@@ -1,70 +1,118 @@
 #include <iostream>
 #include <cmath>
 #include <iomanip>
-#include <numeric>
 #include <vector>
 
-
-
-
 using namespace std;
-double gaussianFunction(double x, double y, double sigma) {
-    return (1.0 / (2 * M_PI * pow(sigma, 2))) *
-            exp(-(pow(x, 2) + pow(y, 2)) / (2 * pow(sigma, 2)));
-}
 
-class Kernel{
-    private:
-        int SIZE;
-        vector<vector<double>> mat;
-        double sigma;
+class Kernel {
 
-    public:
-        Kernel(double sigma) {
-            this->sigma = sigma;
-            SIZE = 2 * ceil(3 * sigma) + 1;
-            mat = vector<vector<double>>(SIZE, vector<double>(SIZE, 0.0));
-        }
-        void createKernel(){
-            int center = SIZE / 2;
-            int x,y;
-            for(int i = 0; i < SIZE; i++ ){
-                for(int j = 0; j < SIZE; j++){
-                    x = j - center;
-                    y = i - center;
+private:
 
-                    mat[i][j] = gaussianFunction(x, y, sigma);
-                }
+    int SIZE;
+    double sigma;
 
+    vector<double> mat;
+
+    int index(int x, int y) const {
+        return y * SIZE + x;
+    }
+
+    double gaussianFunction(int x, int y) const {
+
+        double sigma2 = sigma * sigma;
+
+        double exponent =
+        -((x * x) + (y * y)) / (2.0 * sigma2);
+
+        double coefficient =
+        1.0 / (2.0 * M_PI * sigma2);
+
+        return coefficient * exp(exponent);
+    }
+
+public:
+
+    Kernel(double sigma) {
+
+        this->sigma = sigma;
+
+        SIZE = 2 * ceil(3 * sigma) + 1;
+
+        mat.resize(SIZE * SIZE, 0.0);
+    }
+
+    void createKernel() {
+
+        int center = SIZE / 2;
+
+        for(int y = 0; y < SIZE; y++) {
+
+            for(int x = 0; x < SIZE; x++) {
+
+                int relativeX = x - center;
+                int relativeY = y - center;
+
+                mat[index(x, y)] =
+                gaussianFunction(relativeX, relativeY);
             }
         }
-        void printMatrix(){
-            for(int i= 0; i < SIZE; i++){
-                for(int j = 0; j < SIZE; j++){
-                    cout << fixed << setprecision(6) << setw(8) << mat[i][j] << " ";
 
-                }
-                printf("\n");
-            }
+        normalize();
+    }
+
+    void normalize() {
+
+        double s = sum();
+
+        for(double& value : mat) {
+
+            value /= s;
         }
-        
-        double sum(){
-            double count = 0.0;
-            for(int i= 0; i < SIZE; i++){
-                for(int j = 0; j < SIZE; j++){
-                    count+=mat[i][j];
-                }
-            }
-            return count;
+    }
+
+    double sum() const {
+
+        double total = 0.0;
+
+        for(const double& value : mat) {
+
+            total += value;
         }
+
+        return total;
+    }
+
+    void printMatrix() const {
+
+        for(int y = 0; y < SIZE; y++) {
+
+            for(int x = 0; x < SIZE; x++) {
+
+                cout
+                << fixed
+                << setprecision(6)
+                << setw(10)
+                << mat[index(x, y)]
+                << " ";
+            }
+
+            cout << '\n';
+        }
+    }
 };
 
-int main(){
-    double sigma = 1;
-    Kernel k(1);
-    k.createKernel();
-    k.printMatrix();
-    double soma = k.sum();
+int main() {
 
-    cout << soma << endl;
+    Kernel k(1.0);
+
+    k.createKernel();
+
+    k.printMatrix();
+
+    cout << "\nSoma: "
+         << k.sum()
+         << endl;
+
+    return 0;
 }
