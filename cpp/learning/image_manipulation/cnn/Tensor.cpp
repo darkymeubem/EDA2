@@ -13,3 +13,7 @@ Tensor::Tensor(const Image& img) : channels(img.channels), height(img.h), width(
 float& Tensor::at(int c, int h, int w) {
     return data[c * height * width + h * width + w];
 }
+
+const float& Tensor::at(int c, int h, int w) const {
+    return data[c * height * width + h * width + w];
+}

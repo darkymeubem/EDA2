@@ -48,3 +48,38 @@ Tensor ConvLayer::forward(const Tensor& input) {
     return output;
 }
 
+Tensor ConvLayer::backward(const Tensor& grad_output, float lr) {
+    int out_h = grad_output.height;
+    int out_w = grad_output.width;
+
+    Tensor grad_input(in_channels, last_input.height, last_input.width);
+    // começa zerado (Tensor inicializa com 0)
+
+    for (int f = 0; f < out_channels; f++) {
+        // 3. gradiente do bias: soma todo o grad_output desse filtro
+        for (int oh = 0; oh < out_h; oh++)
+            for (int ow = 0; ow < out_w; ow++)
+                bias.data[f] -= lr * grad_output.at(f, oh, ow);
+
+        for (int ic = 0; ic < in_channels; ic++) {
+            for (int kh = 0; kh < kernel_size; kh++) {
+                for (int kw = 0; kw < kernel_size; kw++) {
+                    float dw = 0.0f;
+
+                    for (int oh = 0; oh < out_h; oh++) {
+                        for (int ow = 0; ow < out_w; ow++) {
+                            // 2. gradiente do peso
+                            dw += grad_output.at(f, oh, ow) * last_input.at(ic, oh+kh, ow+kw);
+
+                            // 1. gradiente do input
+                            grad_input.at(ic, oh+kh, ow+kw) += grad_output.at(f, oh, ow) * weights.at(f*in_channels+ic, kh, kw);
+                        }
+                    }
+                    // 2. atualiza peso com SGD
+                    weights.at(f*in_channels+ic, kh, kw) -= lr * dw;
+                }
+            }
+        }
+    }
+    return grad_input;
+}
