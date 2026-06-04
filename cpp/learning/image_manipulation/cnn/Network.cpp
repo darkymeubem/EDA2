@@ -37,12 +37,28 @@ float Network::backward(int label, float lr) {
 }
 
 void Network::train(std::vector<Tensor>& images, std::vector<int>& labels, int epochs, float lr) {
+    int n = (int)images.size();
+    printf("\nIniciando treino: %d imagens, %d épocas, lr=%.4f\n\n", n, epochs, lr);
+
     for (int e = 0; e < epochs; e++) {
         float total_loss = 0.0f;
-        for (int i = 0; i < (int)images.size(); i++) {
-            forward(images[i]);
+        int correct = 0;
+
+        for (int i = 0; i < n; i++) {
+            Tensor out = forward(images[i]);
             total_loss += backward(labels[i], lr);
+
+            // acurácia: pega o índice com maior probabilidade
+            int pred = 0;
+            for (int j = 1; j < out.size(); j++)
+                if (out.data[j] > out.data[pred]) pred = j;
+            if (pred == labels[i]) correct++;
+
+            if ((i + 1) % 5000 == 0)
+                printf("  [%d/%d] Loss: %.4f | Acc: %.1f%%\n",
+                    i + 1, n, total_loss / (i + 1), 100.0f * correct / (i + 1));
         }
-        printf("Epoch %d | Loss: %.4f\n", e+1, total_loss / images.size());
+        printf("Epoch %d | Loss: %.4f | Acc: %.1f%%\n\n",
+            e + 1, total_loss / n, 100.0f * correct / n);
     }
 }
