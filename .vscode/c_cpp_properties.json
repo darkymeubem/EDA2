@@ -3,15 +3,18 @@
     {
       "name": "windows-gcc-x64",
       "includePath": [
-        "${workspaceFolder}/**"
+        "${workspaceFolder}/**",
+        "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v13.3/include"
       ],
       "compilerPath": "C:/MinGW/bin/g++.exe",
       "cStandard": "${default}",
       "cppStandard": "c++17",
       "intelliSenseMode": "windows-gcc-x64",
-      "compilerArgs": [
-        ""
-      ]
+      "defines": [
+        "__CUDACC__",
+        "__CUDA_ARCH__=860"
+      ],
+      "compilerArgs": []
     }
   ],
   "version": 4

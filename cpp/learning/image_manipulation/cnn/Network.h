@@ -10,12 +10,23 @@ private:
     SoftmaxLayer* softmax;
 
 public:
+    static constexpr int BATCH = 64;
+
     Network();
     ~Network();
 
-    void addLayer(Layer* layer);
-    Tensor forward(const Tensor& input);
-    float backward(int label, float lr);  // retorna o loss
-    float evaluate(std::vector<Tensor>& images, std::vector<int>& labels);
-    void train(std::vector<Tensor>& images, std::vector<int>& labels, int epochs, float lr);
+    void   addLayer(Layer* layer);
+    Tensor forward(const Tensor& batch);
+
+    // Returns mean loss; updates weights for a single batch
+    float  trainBatch(const std::vector<float>& imgs_flat,
+                      const std::vector<int>&   labels,
+                      int start, int count, float lr);
+
+    void train(const std::vector<std::vector<float>>& images,
+               const std::vector<int>& labels,
+               int epochs, float lr);
+
+    float evaluate(const std::vector<std::vector<float>>& images,
+                   const std::vector<int>& labels);
 };

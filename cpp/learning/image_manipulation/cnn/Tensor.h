@@ -1,16 +1,25 @@
 #pragma once
-#include "Image.h"
-#include <cstdint>
+#include <cuda_runtime.h>
 
+// GPU tensor in NCHW layout. Move-only (no copies — GPU alloc is expensive).
 class Tensor {
 public:
-    float* data;
-    int channels, height, width;
+    float* d_data;   // device pointer
+    int n, c, h, w;
 
-    Tensor(int c, int h, int w);
-    Tensor(const Image& img);  // converte Image (uint8_t) → Tensor (float, normalizado 0-1)
+    Tensor(int n, int c, int h, int w);
+    ~Tensor();
 
-    float& at(int c, int h, int w);
-    const float& at(int c, int h, int w) const;
-    int size() const { return channels * height * width; }
+    Tensor(Tensor&& o) noexcept;
+    Tensor& operator=(Tensor&& o) noexcept;
+    Tensor(const Tensor&) = delete;
+    Tensor& operator=(const Tensor&) = delete;
+
+    Tensor clone()               const;  // deep copy on GPU
+    void   fromHost(const float* src);   // host → device
+    void   toHost(float* dst)    const;  // device → host
+    void   zero();
+
+    int size()  const { return n * c * h * w; }
+    int bytes() const { return size() * (int)sizeof(float); }
 };

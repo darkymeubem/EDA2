@@ -1,9 +1,9 @@
 #pragma once
 #include <vector>
-#include "Tensor.h"
 
 class MNISTLoader {
 public:
-    static std::vector<Tensor> loadImages(const char* path, int max = -1);
-    static std::vector<int>    loadLabels(const char* path, int max = -1);
+    // Returns vector of images; each image is 784 floats (28x28, normalized 0-1)
+    static std::vector<std::vector<float>> loadImages(const char* path, int max = -1);
+    static std::vector<int>                loadLabels(const char* path, int max = -1);
 };

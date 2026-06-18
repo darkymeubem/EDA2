@@ -11,7 +11,7 @@ static int reverseInt(int i) {
     return ((int)c1 << 24) | ((int)c2 << 16) | ((int)c3 << 8) | c4;
 }
 
-std::vector<Tensor> MNISTLoader::loadImages(const char* path, int max) {
+std::vector<std::vector<float>> MNISTLoader::loadImages(const char* path, int max) {
     FILE* f = fopen(path, "rb");
     if (!f) { printf("Erro ao abrir %s\n", path); exit(1); }
 
@@ -25,17 +25,17 @@ std::vector<Tensor> MNISTLoader::loadImages(const char* path, int max) {
 
     printf("Carregando %d imagens de %s...\n", n, path);
 
-    std::vector<Tensor> images;
+    std::vector<std::vector<float>> images;
     images.reserve(n);
 
     for (int i = 0; i < n; i++) {
-        Tensor t(1, rows, cols);
+        std::vector<float> img(rows * cols);
         for (int j = 0; j < rows * cols; j++) {
             unsigned char pixel;
             fread(&pixel, 1, 1, f);
-            t.data[j] = pixel / 255.0f;
+            img[j] = pixel / 255.0f;
         }
-        images.push_back(t);
+        images.push_back(std::move(img));
         if ((i + 1) % 10000 == 0)
             printf("  %d/%d\n", i + 1, n);
     }
